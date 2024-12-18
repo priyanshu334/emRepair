@@ -26,6 +26,9 @@ class _AddRecordsState extends State<AddRecords> {
   String? _selectedStatus;
 
   // Handle bottom navigation bar taps
+  void onsubmit(){
+    
+  }
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
@@ -117,6 +120,16 @@ class _AddRecordsState extends State<AddRecords> {
                     hintText: "Device Warranty",
                   ),
                 ),
+                const SizedBox(height: 20,),
+                Center(
+                  child: ElevatedButton(onPressed: onsubmit,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.pink,
+                    padding: const EdgeInsets.symmetric(horizontal: 50,vertical: 15)
+                  ),
+                  
+                   child: Text("Submit",style: TextStyle(fontSize: 16 ,fontWeight: FontWeight.bold),)),
+                )
               ],
             ),
           ),

@@ -1,13 +1,73 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CustomerDetails extends StatefulWidget {
   const CustomerDetails({super.key});
+
   @override
   State<CustomerDetails> createState() => _CustomerDetailsState();
 }
 
 class _CustomerDetailsState extends State<CustomerDetails> {
   final TextEditingController _controller = TextEditingController();
+
+  // Method to show the dialog for adding customer details
+  void _showAddCustomerDialog() {
+    final TextEditingController nameController = TextEditingController();
+    final TextEditingController phoneController = TextEditingController();
+    final TextEditingController addressController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Enter Customer Details"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: nameController,
+                decoration: const InputDecoration(labelText: "Customer Name"),
+              ),
+              TextField(
+                controller: phoneController,
+                decoration: const InputDecoration(labelText: "Customer Phone No"),
+                keyboardType: TextInputType.phone,
+              ),
+              TextField(
+                controller: addressController,
+                decoration: const InputDecoration(labelText: "Customer Address"),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context); // Close the dialog without saving
+              },
+              child: const Text("Close"),
+            ),
+            TextButton(
+              onPressed: () async {
+                // Save customer details to SharedPreferences
+                final SharedPreferences prefs = await SharedPreferences.getInstance();
+                await prefs.setString('customer_name', nameController.text);
+                await prefs.setString('customer_phone', phoneController.text);
+                await prefs.setString('customer_address', addressController.text);
+
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Customer Added: ${nameController.text}')),
+                );
+
+                Navigator.pop(context); // Close the dialog after saving
+              },
+              child: const Text("Add"),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -81,9 +141,7 @@ class _CustomerDetailsState extends State<CustomerDetails> {
                   Expanded(
                     flex: 1,
                     child: ElevatedButton(
-                      onPressed: () {
-                        // Handle the "Add" button action here
-                      },
+                      onPressed: _showAddCustomerDialog, // Show the dialog on click
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.green,
                         elevation: 3,
