@@ -2,21 +2,26 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class CustomerDetails extends StatefulWidget {
-  const CustomerDetails({super.key});
+  final TextEditingController searchController;
+  final TextEditingController nameController;
+  final TextEditingController phoneController;
+  final TextEditingController addressController;
+
+  const CustomerDetails({
+    super.key,
+    required this.searchController,
+    required this.nameController,
+    required this.phoneController,
+    required this.addressController,
+  });
 
   @override
   State<CustomerDetails> createState() => _CustomerDetailsState();
 }
 
 class _CustomerDetailsState extends State<CustomerDetails> {
-  final TextEditingController _controller = TextEditingController();
-
   // Method to show the dialog for adding customer details
   void _showAddCustomerDialog() {
-    final TextEditingController nameController = TextEditingController();
-    final TextEditingController phoneController = TextEditingController();
-    final TextEditingController addressController = TextEditingController();
-
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -26,16 +31,16 @@ class _CustomerDetailsState extends State<CustomerDetails> {
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
-                controller: nameController,
+                controller: widget.nameController,
                 decoration: const InputDecoration(labelText: "Customer Name"),
               ),
               TextField(
-                controller: phoneController,
+                controller: widget.phoneController,
                 decoration: const InputDecoration(labelText: "Customer Phone No"),
                 keyboardType: TextInputType.phone,
               ),
               TextField(
-                controller: addressController,
+                controller: widget.addressController,
                 decoration: const InputDecoration(labelText: "Customer Address"),
               ),
             ],
@@ -51,12 +56,12 @@ class _CustomerDetailsState extends State<CustomerDetails> {
               onPressed: () async {
                 // Save customer details to SharedPreferences
                 final SharedPreferences prefs = await SharedPreferences.getInstance();
-                await prefs.setString('customer_name', nameController.text);
-                await prefs.setString('customer_phone', phoneController.text);
-                await prefs.setString('customer_address', addressController.text);
+                await prefs.setString('customer_name', widget.nameController.text);
+                await prefs.setString('customer_phone', widget.phoneController.text);
+                await prefs.setString('customer_address', widget.addressController.text);
 
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Customer Added: ${nameController.text}')),
+                  SnackBar(content: Text('Customer Added: ${widget.nameController.text}')),
                 );
 
                 Navigator.pop(context); // Close the dialog after saving
@@ -96,7 +101,7 @@ class _CustomerDetailsState extends State<CustomerDetails> {
                   Expanded(
                     flex: 3,
                     child: TextField(
-                      controller: _controller,
+                      controller: widget.searchController,
                       decoration: InputDecoration(
                         border: const OutlineInputBorder(),
                         hintText: "Search and select from the list",

@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
 
 class ReciverFeild extends StatefulWidget {
-  const ReciverFeild({super.key});
+  final TextEditingController receiverController;
+  final TextEditingController operatorController;
+  const ReciverFeild({super.key,required this.operatorController,required this.receiverController});
 
   @override
   State<ReciverFeild> createState() => _ReciverFeildState();
 }
 
 class _ReciverFeildState extends State<ReciverFeild> {
-  final TextEditingController receiverController = TextEditingController();
-  final TextEditingController operatorController = TextEditingController();
-
   bool _inHouse = false;
   bool _serviceCenter = false;
 
@@ -40,7 +39,7 @@ class _ReciverFeildState extends State<ReciverFeild> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               TextField(
-                controller: receiverController,
+                controller: widget.receiverController,
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
                   hintText: "Name of Receiver (Owner/Assistant)",
@@ -53,7 +52,7 @@ class _ReciverFeildState extends State<ReciverFeild> {
               ),
               const SizedBox(height: 10),
               TextField(
-                controller: operatorController,
+                controller: widget.operatorController,
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
                   hintText: "Select operator",

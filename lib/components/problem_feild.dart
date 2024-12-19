@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 
 class ProblemField extends StatefulWidget {
-  const ProblemField({super.key});
+  final TextEditingController ProblemController;
+  const ProblemField({super.key,required this.ProblemController});
 
   @override
   State<ProblemField> createState() => _ProblemFieldState();
 }
 
 class _ProblemFieldState extends State<ProblemField> {
-  final TextEditingController _textController = TextEditingController();
-
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -29,7 +28,7 @@ class _ProblemFieldState extends State<ProblemField> {
               // Expanded allows the TextField to take available space
               Expanded(
                 child: TextField(
-                  controller: _textController,
+                  controller:widget.ProblemController,
                   decoration: const InputDecoration(
                     border: OutlineInputBorder(),
                     hintText: 'Describe problem',
@@ -42,12 +41,12 @@ class _ProblemFieldState extends State<ProblemField> {
               ElevatedButton(
                 onPressed: () {
                   // Add button action
-                  final text = _textController.text;
+                  final text = widget.ProblemController.text;
                   if (text.isNotEmpty) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text('Problem Added: $text')),
                     );
-                    _textController.clear();
+                    widget.ProblemController.clear();
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('Please enter a problem')),

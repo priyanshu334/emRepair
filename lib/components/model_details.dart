@@ -49,27 +49,20 @@ class ModelDetails extends StatelessWidget {
                   mainAxisSpacing: 12,
                   crossAxisSpacing: 12,
                   children: [
-                    _buildIcon(Icons.car_repair, "Car", () {
+                    _buildIcon(Icons.camera_front, "Device Front", () {
                       // Handle Car action
                       print("Car selected");
                     }),
-                    _buildIcon(Icons.phone_android, "Phone", () {
+                    _buildIcon(Icons.photo_camera_back, "Device back", () {
                       // Handle Phone action
                       print("Phone selected");
                     }),
-                    _buildIcon(Icons.laptop, "Laptop", () {
-                      // Handle Laptop action
-                      print("Laptop selected");
-                    }),
-                    _buildIcon(Icons.tv, "TV", () {
-                      // Handle TV action
-                      print("TV selected");
-                    }),
-                    _buildIcon(Icons.headphones, "Headphones", () {
+                    
+                    _buildIcon(Icons.barcode_reader, "Barcode", () {
                       // Handle Headphones action
                       print("Headphones selected");
                     }),
-                    _buildIcon(Icons.watch, "Watch", () {
+                    _buildIcon(Icons.note_add, "Notes", () {
                       // Handle Watch action
                       print("Watch selected");
                     }),

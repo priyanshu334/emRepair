@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 
 class ModelFeild extends StatefulWidget {
-  const ModelFeild({super.key});
+  final TextEditingController textController;
+  const ModelFeild({super.key,required this.textController});
   @override
   State<ModelFeild> createState() => _ModelFeildState();
 }
 
 class _ModelFeildState extends State<ModelFeild> {
-  final TextEditingController _textController = TextEditingController();
-
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -25,7 +24,7 @@ class _ModelFeildState extends State<ModelFeild> {
               height: 16,
             ),
             TextField(
-              controller: _textController,
+              controller: widget.textController,
               decoration: const InputDecoration(
                 border: OutlineInputBorder(),
                 hintText: 'Model..',

@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 
 class PriceFeild extends StatelessWidget {
+  final TextEditingController Pricecontroller;
 
-
-  const PriceFeild({super.key});
+  const PriceFeild({super.key,required this.Pricecontroller});
 
   @override
   Widget build(BuildContext context) {
-    final TextEditingController _controller = TextEditingController();
     return Padding(
       padding: const EdgeInsets.all(12),
       child: Column(
@@ -19,13 +18,15 @@ class PriceFeild extends StatelessWidget {
             height: 15,
           ),
           TextField(
-            controller: _controller,
+            controller: Pricecontroller,
             decoration: InputDecoration(
               border: OutlineInputBorder(),
               hintText: "please enter the price",
             ),
           ),
-          const SizedBox(height: 12,),
+          const SizedBox(
+            height: 12,
+          ),
         ],
       ),
     );

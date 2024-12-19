@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 
 class PaidFeild extends StatelessWidget {
+  final TextEditingController Paidcontroller;
 
-
-  const PaidFeild({super.key});
+  const PaidFeild({super.key, required this.Paidcontroller});
 
   @override
   Widget build(BuildContext context) {
-    final TextEditingController _controller = TextEditingController();
     return Padding(
       padding: const EdgeInsets.all(12),
       child: Column(
@@ -19,13 +18,15 @@ class PaidFeild extends StatelessWidget {
             height: 15,
           ),
           TextField(
-            controller: _controller,
+            controller: Paidcontroller,
             decoration: InputDecoration(
               border: OutlineInputBorder(),
               hintText: "enter paid amount ",
             ),
           ),
-          const SizedBox(height: 12,),
+          const SizedBox(
+            height: 12,
+          ),
         ],
       ),
     );

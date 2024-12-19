@@ -1,9 +1,20 @@
+import 'package:app/providers/add_record_provider.dart';
+import 'package:app/providers/list_provider.dart';
+import 'package:app/providers/order_data_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:app/pages/splash_screen.dart'; // Import the new splash screen file
 import 'package:app/pages/home.dart';
+import 'package:provider/provider.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(MultiProvider(
+    providers: [
+      ChangeNotifierProvider(create: (_) => AddRecordsProvider()),
+      ChangeNotifierProvider(create: (_)=> OrderDataProvider()),
+      ChangeNotifierProvider(create: (_)=>ListProvider())
+    ],
+    child: const MyApp(),
+  ));
 }
 
 class MyApp extends StatelessWidget {
