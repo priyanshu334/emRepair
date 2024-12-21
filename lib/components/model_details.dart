@@ -1,7 +1,58 @@
 import 'package:flutter/material.dart';
+import 'package:camera/camera.dart';
 
-class ModelDetails extends StatelessWidget {
+class ModelDetails extends StatefulWidget {
   const ModelDetails({super.key});
+
+  @override
+  _ModelDetailsState createState() => _ModelDetailsState();
+}
+
+class _ModelDetailsState extends State<ModelDetails> {
+  late CameraController _controller;
+  late Future<void> _initializeControllerFuture;
+  late List<CameraDescription> cameras;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeCamera();
+  }
+
+  // Initialize the camera
+  Future<void> _initializeCamera() async {
+    cameras = await availableCameras();
+    _controller = CameraController(cameras[0], ResolutionPreset.high);
+    _initializeControllerFuture = _controller.initialize();
+  }
+
+  // Capture image
+  Future<void> _capturePhoto() async {
+    try {
+      // Wait for the camera to initialize
+      await _initializeControllerFuture;
+
+      // Take the picture
+      final XFile file = await _controller.takePicture();
+
+      // You can do something with the captured image, such as displaying it
+      // In this case, we're just printing the path for now
+      print("Captured image: ${file.path}");
+
+      // Show success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Image captured!")),
+      );
+    } catch (e) {
+      print("Error capturing image: $e");
+    }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _controller.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,21 +101,16 @@ class ModelDetails extends StatelessWidget {
                   crossAxisSpacing: 12,
                   children: [
                     _buildIcon(Icons.camera_front, "Device Front", () {
-                      // Handle Car action
-                      print("Car selected");
+                      _capturePhoto(); // Open camera and capture image
                     }),
-                    _buildIcon(Icons.photo_camera_back, "Device back", () {
-                      // Handle Phone action
-                      print("Phone selected");
+                    _buildIcon(Icons.photo_camera_back, "Device Back", () {
+                      _capturePhoto(); // Open camera and capture image
                     }),
-                    
                     _buildIcon(Icons.barcode_reader, "Barcode", () {
-                      // Handle Headphones action
-                      print("Headphones selected");
+                      _capturePhoto(); // Open camera and capture image
                     }),
-                    _buildIcon(Icons.note_add, "Notes", () {
-                      // Handle Watch action
-                      print("Watch selected");
+                    _buildIcon(Icons.note, "Note", () {
+                      _capturePhoto(); // Open camera and capture image
                     }),
                   ],
                 ),
