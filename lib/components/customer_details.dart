@@ -20,51 +20,123 @@ class CustomerDetails extends StatefulWidget {
 }
 
 class _CustomerDetailsState extends State<CustomerDetails> {
-  // Method to show the dialog for adding customer details
+  final _formKey = GlobalKey<FormState>(); // Key for the form
+  List<Map<String, String>> _customers = [];
+
+  // Load customers from SharedPreferences
+  Future<void> _loadCustomers() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final List<String>? storedCustomers = prefs.getStringList('customers');
+    if (storedCustomers != null) {
+      setState(() {
+        _customers = storedCustomers
+            .map((customer) => Map<String, String>.from(
+                  customer.replaceAll("{", "").replaceAll("}", "").split(", ").fold(
+                        {},
+                        (map, element) {
+                          final kv = element.split(": ");
+                          return {...map, kv[0]: kv[1]};
+                        },
+                      ),
+                ))
+            .toList();
+      });
+    }
+  }
+
+  // Save customers to SharedPreferences
+  Future<void> _saveCustomers() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList('customers', _customers.map((c) => c.toString()).toList());
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCustomers();
+  }
+
   void _showAddCustomerDialog() {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text("Enter Customer Details"),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: widget.nameController,
-                decoration: const InputDecoration(labelText: "Customer Name"),
+          content: Form(
+            key: _formKey,
+            child: SizedBox(
+              width: MediaQuery.of(context).size.width * 0.8,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextFormField(
+                    controller: widget.nameController,
+                    decoration: const InputDecoration(labelText: "Customer Name"),
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'Name is required';
+                      }
+                      return null;
+                    },
+                  ),
+                  TextFormField(
+                    controller: widget.phoneController,
+                    decoration: const InputDecoration(labelText: "Customer Phone No"),
+                    keyboardType: TextInputType.phone,
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'Phone number is required';
+                      }
+                      if (!RegExp(r'^[0-9]{10}$').hasMatch(value)) {
+                        return 'Enter a valid 10-digit phone number';
+                      }
+                      return null;
+                    },
+                  ),
+                  TextFormField(
+                    controller: widget.addressController,
+                    decoration: const InputDecoration(labelText: "Customer Address"),
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'Address is required';
+                      }
+                      return null;
+                    },
+                  ),
+                ],
               ),
-              TextField(
-                controller: widget.phoneController,
-                decoration: const InputDecoration(labelText: "Customer Phone No"),
-                keyboardType: TextInputType.phone,
-              ),
-              TextField(
-                controller: widget.addressController,
-                decoration: const InputDecoration(labelText: "Customer Address"),
-              ),
-            ],
+            ),
           ),
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.pop(context); // Close the dialog without saving
+                Navigator.pop(context);
               },
               child: const Text("Close"),
             ),
             TextButton(
               onPressed: () async {
-                // Save customer details to SharedPreferences
-                final SharedPreferences prefs = await SharedPreferences.getInstance();
-                await prefs.setString('customer_name', widget.nameController.text);
-                await prefs.setString('customer_phone', widget.phoneController.text);
-                await prefs.setString('customer_address', widget.addressController.text);
+                if (_formKey.currentState?.validate() ?? false) {
+                  setState(() {
+                    _customers.add({
+                      'name': widget.nameController.text,
+                      'phone': widget.phoneController.text,
+                      'address': widget.addressController.text,
+                    });
+                  });
 
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Customer Added: ${widget.nameController.text}')),
-                );
+                  await _saveCustomers();
 
-                Navigator.pop(context); // Close the dialog after saving
+                  widget.nameController.clear();
+                  widget.phoneController.clear();
+                  widget.addressController.clear();
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Customer Added')),
+                  );
+
+                  Navigator.pop(context);
+                }
               },
               child: const Text("Add"),
             ),
@@ -74,29 +146,64 @@ class _CustomerDetailsState extends State<CustomerDetails> {
     );
   }
 
+  void _showSelectCustomerDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Select a Customer"),
+          content: SizedBox(
+            width: MediaQuery.of(context).size.width * 0.8,
+            height: MediaQuery.of(context).size.height * 0.5,
+            child: ListView.builder(
+              itemCount: _customers.length,
+              itemBuilder: (context, index) {
+                final customer = _customers[index];
+                return ListTile(
+                  title: Text(customer['name'] ?? 'No Name'),
+                  subtitle: Text("Phone: ${customer['phone']}\nAddress: ${customer['address']}"),
+                  isThreeLine: true,
+                  onTap: () {
+                    Navigator.pop(context, customer);
+                  },
+                );
+              },
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text("Close"),
+            ),
+          ],
+        );
+      },
+    ).then((selectedCustomer) {
+      if (selectedCustomer != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Selected Customer: ${selectedCustomer['name']}")),
+        );
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(12),
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
-          color: Colors.grey[100], // Light background color for contrast
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                "Customer Details",
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 16),
-              Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              color: Colors.grey[100],
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
                 children: [
                   Expanded(
                     flex: 3,
@@ -121,12 +228,9 @@ class _CustomerDetailsState extends State<CustomerDetails> {
                   Expanded(
                     flex: 1,
                     child: ElevatedButton(
-                      onPressed: () {
-                        // Handle the "Select" button action here
-                      },
+                      onPressed: _showSelectCustomerDialog,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.pink,
-                        elevation: 3,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
@@ -146,10 +250,9 @@ class _CustomerDetailsState extends State<CustomerDetails> {
                   Expanded(
                     flex: 1,
                     child: ElevatedButton(
-                      onPressed: _showAddCustomerDialog, // Show the dialog on click
+                      onPressed: _showAddCustomerDialog,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.green,
-                        elevation: 3,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
@@ -167,9 +270,9 @@ class _CustomerDetailsState extends State<CustomerDetails> {
                   ),
                 ],
               ),
-            ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }

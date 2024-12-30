@@ -1,3 +1,9 @@
+
+import 'package:em_repair/pages/canceled_page.dart';
+import 'package:em_repair/pages/delivered_page.dart';
+import 'package:em_repair/pages/house_page.dart';
+import 'package:em_repair/pages/pending_page.dart';
+import 'package:em_repair/pages/repaired_page.dart';
 import 'package:flutter/material.dart';
 
 class OrderField extends StatelessWidget {
@@ -15,38 +21,52 @@ class OrderField extends StatelessWidget {
               ListTile(
                 title: const Text('Pending'),
                 onTap: () {
-                  Navigator.pop(context, 'Pending');
+                  Navigator.pop(context); // Close the dialog
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const PendingPage()),
+                  );
                 },
               ),
               ListTile(
                 title: const Text('Repaired'),
                 onTap: () {
-                  Navigator.pop(context, 'Repaired');
+                  Navigator.pop(context); // Close the dialog
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const RepairedPage()),
+                  );
                 },
               ),
               ListTile(
                 title: const Text('Delivered'),
                 onTap: () {
-                  Navigator.pop(context, 'Delivered');
+                  Navigator.pop(context); // Close the dialog
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const DeliveredPage()),
+                  );
                 },
               ),
               ListTile(
                 title: const Text('Canceled'),
                 onTap: () {
-                  Navigator.pop(context, 'Canceled');
+                  Navigator.pop(context); // Close the dialog
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const CanceledPage()),
+                  );
                 },
               ),
             ],
           ),
         );
       },
-    ).then((selectedValue) {
-      if (selectedValue != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Selected Order Type: $selectedValue')),
-        );
-      }
-    });
+    );
   }
 
   void _showLocationDialog(BuildContext context) {
@@ -61,13 +81,17 @@ class OrderField extends StatelessWidget {
               ListTile(
                 title: const Text('House'),
                 onTap: () {
-                  Navigator.pop(context, 'House');
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => HousePage()));
                 },
               ),
               ListTile(
                 title: const Text('Service Center'),
                 onTap: () {
-                  Navigator.pop(context, 'Service Center');
+                   Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => HousePage()));
+                
+                  
                 },
               ),
             ],
@@ -126,7 +150,8 @@ class OrderField extends StatelessWidget {
               final DateTime now = DateTime.now();
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text('Today\'s Date: ${now.toLocal().toString().split(' ')[0]}'),
+                  content: Text(
+                      'Today\'s Date: ${now.toLocal().toString().split(' ')[0]}'),
                 ),
               );
             },

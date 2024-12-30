@@ -1,7 +1,6 @@
-import 'package:app/providers/list_provider.dart';
+import 'package:em_repair/providers/list_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
 
 class ListPage extends StatelessWidget {
   const ListPage({super.key});
@@ -24,6 +23,7 @@ class ListPage extends StatelessWidget {
         padding: const EdgeInsets.all(12.0),
         child: Column(
           children: [
+            // Form Inputs
             TextField(
               controller: formProvider.nameController,
               decoration: const InputDecoration(
@@ -45,12 +45,11 @@ class ListPage extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
+                // Submit Button
                 ElevatedButton(
                   onPressed: () {
-                    // Handle form submission logic here
-                    print("Name: ${formProvider.nameController.text}");
-                    print("Service: ${formProvider.serviceController.text}");
-                    print("Description: ${formProvider.descriptionController.text}");
+                    // Add data to list provider
+                    formProvider.addEntry();
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.pink,
@@ -65,9 +64,10 @@ class ListPage extends StatelessWidget {
                         color: Colors.white, fontWeight: FontWeight.bold),
                   ),
                 ),
+                // Cancel Button
                 ElevatedButton(
                   onPressed: () {
-                    // Clear all text fields
+                    // Clear all fields
                     formProvider.clearFields();
                   },
                   style: ElevatedButton.styleFrom(
@@ -84,6 +84,39 @@ class ListPage extends StatelessWidget {
                   ),
                 ),
               ],
+            ),
+            const SizedBox(height: 20),
+            // Display List of Entries
+            Expanded(
+              child: ListView.builder(
+                itemCount: formProvider.entries.length,
+                itemBuilder: (context, index) {
+                  final entry = formProvider.entries[index];
+                  return Card(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      side: const BorderSide(color: Colors.pink),
+                    ),
+                    child: ListTile(
+                      title: Text(entry['name']),
+                      subtitle:
+                          Text('${entry['service']} - ${entry['description']}'),
+                      trailing: IconButton(
+                        icon: Icon(
+                          entry['isScored']
+                              ? Icons.check_box
+                              : Icons.check_box_outline_blank,
+                          color: Colors.pink,
+                        ),
+                        onPressed: () {
+                          // Toggle the 'isScored' status
+                          formProvider.toggleScoredStatus(index);
+                        },
+                      ),
+                    ),
+                  );
+                },
+              ),
             ),
           ],
         ),

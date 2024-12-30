@@ -11,48 +11,73 @@ class ListProvider with ChangeNotifier {
   final TextEditingController serviceController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
 
+  // List to hold form entries
+  List<Map<String, dynamic>> entries = [];
+
+  // Add a new entry to the list
+  void addEntry() {
+    final entry = {
+      'name': nameController.text.trim(),
+      'service': serviceController.text.trim(),
+      'description': descriptionController.text.trim(),
+      'isScored': false,  // Initially, the entry is not scored
+    };
+
+    entries.add(entry);
+    clearFields();
+    _saveData();  // Automatically save data after adding an entry
+    notifyListeners();
+  }
+
+  // Toggle scored status of an entry
+  void toggleScoredStatus(int index) {
+    entries[index]['isScored'] = !entries[index]['isScored'];
+    _saveData();  // Automatically save data after toggling the status
+    notifyListeners();
+  }
+
+  // Save data to both SharedPreferences and JSON file (to avoid duplication)
+  Future<void> _saveData() async {
+    await saveToSharedPreferences();
+    await saveToJsonFile();
+  }
+
   // Save data to SharedPreferences
   Future<void> saveToSharedPreferences() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
 
-    final Map<String, String> data = {
-      'name': nameController.text,
-      'service': serviceController.text,
-      'description': descriptionController.text,
-    };
+    final List<String> encodedEntries = entries
+        .map((entry) => json.encode(entry))
+        .toList();
 
-    await prefs.setString('operatorFormData', json.encode(data));
-    notifyListeners();
+    await prefs.setStringList('operatorFormData', encodedEntries);
   }
 
   // Load data from SharedPreferences
   Future<void> loadFromSharedPreferences() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final String? jsonData = prefs.getString('operatorFormData');
+    final List<String>? encodedEntries = prefs.getStringList('operatorFormData');
 
-    if (jsonData != null) {
-      final Map<String, dynamic> data = json.decode(jsonData);
+    if (encodedEntries != null) {
+      entries = encodedEntries
+          .map((entry) => json.decode(entry))
+          .toList()
+          .cast<Map<String, dynamic>>();
 
-      nameController.text = data['name'] ?? '';
-      serviceController.text = data['service'] ?? '';
-      descriptionController.text = data['description'] ?? '';
       notifyListeners();
     }
   }
 
   // Save data to a JSON file
   Future<void> saveToJsonFile() async {
-    final Map<String, String> data = {
-      'name': nameController.text,
-      'service': serviceController.text,
-      'description': descriptionController.text,
-    };
-
     final directory = await getApplicationDocumentsDirectory();
     final file = File('${directory.path}/operator_form_data.json');
 
-    await file.writeAsString(json.encode(data));
-    notifyListeners();
+    final List<String> encodedEntries = entries
+        .map((entry) => json.encode(entry))
+        .toList();
+
+    await file.writeAsString(json.encode(encodedEntries));
   }
 
   // Load data from a JSON file
@@ -63,11 +88,12 @@ class ListProvider with ChangeNotifier {
 
       if (await file.exists()) {
         final String jsonData = await file.readAsString();
-        final Map<String, dynamic> data = json.decode(jsonData);
+        final List<dynamic> decodedEntries = json.decode(jsonData);
 
-        nameController.text = data['name'] ?? '';
-        serviceController.text = data['service'] ?? '';
-        descriptionController.text = data['description'] ?? '';
+        entries = decodedEntries
+            .map((entry) => entry as Map<String, dynamic>)
+            .toList();
+
         notifyListeners();
       }
     } catch (e) {

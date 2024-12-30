@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:barcode_scan2/barcode_scan2.dart';
 
 class BarCode extends StatefulWidget {
   const BarCode({super.key});
@@ -9,6 +10,29 @@ class BarCode extends StatefulWidget {
 
 class _BarCodeState extends State<BarCode> {
   final TextEditingController _textController = TextEditingController();
+
+  Future<void> _scanBarcode() async {
+    try {
+      // Trigger barcode scan
+      var result = await BarcodeScanner.scan();
+      if (result.rawContent.isNotEmpty) {
+        setState(() {
+          _textController.text = result.rawContent; // Update the TextField
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Barcode Scanned: ${result.rawContent}')),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Scan cancelled')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,34 +50,20 @@ class _BarCodeState extends State<BarCode> {
           ),
           Row(
             children: [
-              // Expanded allows the TextField to take available space
               Expanded(
                 child: TextField(
                   controller: _textController,
                   decoration: const InputDecoration(
                     border: OutlineInputBorder(),
-                    hintText: 'enter or scan barcode',
+                    hintText: 'Enter or scan barcode',
                   ),
                 ),
               ),
               const SizedBox(
-                width: 12, // Add spacing between TextField and Button
+                width: 12,
               ),
               ElevatedButton(
-                onPressed: () {
-                  // Add button action
-                  final text = _textController.text;
-                  if (text.isNotEmpty) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Problem Added: $text')),
-                    );
-                    _textController.clear();
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Please enter a problem')),
-                    );
-                  }
-                },
+                onPressed: _scanBarcode, // Call the scan function
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.pink,
                   foregroundColor: Colors.white,

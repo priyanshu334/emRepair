@@ -5,47 +5,51 @@ import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AddRecordsProvider with ChangeNotifier {
-  String? selectedStatus;
-  final TextEditingController additionalDetailsController = TextEditingController();
-  final TextEditingController warrantyController = TextEditingController();
-  final TextEditingController modelController = TextEditingController();
-  final TextEditingController problemController = TextEditingController();
-  final TextEditingController priceController = TextEditingController();
-  final TextEditingController paidController = TextEditingController();
-  final TextEditingController operatorController = TextEditingController();
-  final TextEditingController receiverController = TextEditingController();
- final TextEditingController searchController = TextEditingController();
-  final TextEditingController nameController = TextEditingController();
-  final TextEditingController phoneController = TextEditingController();
-  final TextEditingController addressController = TextEditingController();
-    bool isLoading = false;
+  String? selectedStatus = 'Pending'; // Set default status
+  DateTime? dateTime = DateTime.now(); // Initialize to current date
 
-  
+  // Controllers
+  final Map<String, TextEditingController> _controllers = {
+    'additionalDetails': TextEditingController(),
+    'warranty': TextEditingController(),
+    'model': TextEditingController(),
+    'problem': TextEditingController(),
+    'price': TextEditingController(),
+    'paid': TextEditingController(),
+    'operator': TextEditingController(),
+    'receiver': TextEditingController(),
+    'search': TextEditingController(),
+    'name': TextEditingController(),
+    'phone': TextEditingController(),
+    'address': TextEditingController(),
+  };
+
+  List<Map<String, dynamic>> _records = []; // List to store all records
+  List<Map<String, dynamic>> get records => _records;
+
+  bool isLoading = false;
+
+  // Controller Getters
+  TextEditingController get searchController => _controllers['search']!;
+  TextEditingController get nameController => _controllers['name']!;
+  TextEditingController get phoneController => _controllers['phone']!;
+  TextEditingController get addressController => _controllers['address']!;
+  TextEditingController get modelController => _controllers['model']!;
+  TextEditingController get problemController => _controllers['problem']!;
+  TextEditingController get priceController => _controllers['price']!;
+  TextEditingController get paidController => _controllers['paid']!;
+  TextEditingController get operatorController => _controllers['operator']!;
+  TextEditingController get receiverController => _controllers['receiver']!;
+  TextEditingController get additionalDetailsController => _controllers['additionalDetails']!;
+  TextEditingController get warrantyController => _controllers['warranty']!;
 
   // Load data from JSON file
   Future<void> loadDataFromJsonFile() async {
     try {
-      final directory = await getApplicationDocumentsDirectory();
-      final file = File('${directory.path}/orders.json');
-
+      final file = await _getJsonFile();
       if (await file.exists()) {
         final String jsonData = await file.readAsString();
-        final List<Map<String, dynamic>> orders = List<Map<String, dynamic>>.from(json.decode(jsonData));
-
-        if (orders.isNotEmpty) {
-          final Map<String, dynamic> data = orders.last;
-
-          // Populate controllers and selected status
-          selectedStatus = data['status'];
-          modelController.text = data['model'] ?? '';
-          problemController.text = data['problem'] ?? '';
-          priceController.text = data['price'] ?? '';
-          paidController.text = data['paid'] ?? '';
-          additionalDetailsController.text = data['additionalDetails'] ?? '';
-          warrantyController.text = data['warranty'] ?? '';
-          operatorController.text = data['operator'] ?? '';
-          receiverController.text = data['receiver'] ?? '';
-        }
+        _records = List<Map<String, dynamic>>.from(json.decode(jsonData));
         notifyListeners();
       }
     } catch (e) {
@@ -54,96 +58,89 @@ class AddRecordsProvider with ChangeNotifier {
   }
 
   // Save data to JSON file
-  Future<void> saveDataToJsonFile() async {
-    final Map<String, dynamic> formData = {
-      'status': selectedStatus,
-      'model': modelController.text,
-      'problem': problemController.text,
-      'price': priceController.text,
-      'paid': paidController.text,
-      'additionalDetails': additionalDetailsController.text,
-      'warranty': warrantyController.text,
-      'operator': operatorController.text,
-      'receiver': receiverController.text,
-    };
-
+  Future<void> saveDataToJsonFile({String? capturedImagePath}) async {
     try {
-      final directory = await getApplicationDocumentsDirectory();
-      final file = File('${directory.path}/orders.json');
+      final Map<String, dynamic> formData = {
+        'dateTime': DateTime.now().toIso8601String(),
+        'modelDetails': {
+          'status': selectedStatus,
+          'model': _controllers['model']!.text,
+          'problem': _controllers['problem']!.text,
+          'price': _controllers['price']!.text,
+          'paid': _controllers['paid']!.text,
+          'additionalDetails': _controllers['additionalDetails']!.text,
+          'warranty': _controllers['warranty']!.text,
+          'operator': _controllers['operator']!.text,
+          'receiver': _controllers['receiver']!.text,
+          'imagePath': capturedImagePath ?? '',
+        },
+      };
 
-      List<Map<String, dynamic>> orders = [];
-
-      // If the file exists, load existing data
-      if (await file.exists()) {
-        final String jsonData = await file.readAsString();
-        orders = List<Map<String, dynamic>>.from(json.decode(jsonData));
-      }
-
-      // Add the new record to the list
-      orders.add(formData);
-
-      // Save the updated list back to the file
-      final String updatedJsonData = json.encode(orders);
-      await file.writeAsString(updatedJsonData);
-
+      _records.add(formData);
+      final file = await _getJsonFile();
+      await file.writeAsString(json.encode(_records));
       notifyListeners();
     } catch (e) {
       debugPrint('Error saving JSON file: $e');
     }
   }
 
+  // Remove a record by index
+  void removeRecord(int index) {
+    if (index >= 0 && index < _records.length) {
+      _records.removeAt(index);
+      notifyListeners();
+      _saveRecordsToFile(); // Save updated list to file
+    }
+  }
+
+  Future<void> _saveRecordsToFile() async {
+    try {
+      final file = await _getJsonFile();
+      await file.writeAsString(json.encode(_records));
+    } catch (e) {
+      debugPrint('Error saving JSON file: $e');
+    }
+  }
+
+  // Populate controllers with loaded data
+  void _populateControllers(Map<String, dynamic> modelDetails) {
+    modelDetails.forEach((key, value) {
+      if (_controllers.containsKey(key)) {
+        _controllers[key]!.text = value ?? '';
+      }
+    });
+  }
+
+  // Helper to get the JSON file
+  Future<File> _getJsonFile() async {
+    final directory = await getApplicationDocumentsDirectory();
+    return File('${directory.path}/orders.json');
+  }
+
   // Save form data using SharedPreferences
   Future<void> saveToPreferences() async {
     try {
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      final prefs = await SharedPreferences.getInstance();
 
       prefs.setString('status', selectedStatus ?? '');
-      prefs.setString('model', modelController.text);
-      prefs.setString('problem', problemController.text);
-      prefs.setString('price', priceController.text);
-      prefs.setString('paid', paidController.text);
-      prefs.setString('additionalDetails', additionalDetailsController.text);
-      prefs.setString('warranty', warrantyController.text);
-      prefs.setString('operator', operatorController.text);
-      prefs.setString('receiver', receiverController.text);
-
-      notifyListeners();
+      for (var entry in _controllers.entries) {
+        prefs.setString(entry.key, entry.value.text);
+      }
     } catch (e) {
       debugPrint('Error saving to SharedPreferences: $e');
     }
   }
 
-  // Load form data from SharedPreferences
-  Future<void> loadFromPreferences() async {
-    try {
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-
-      selectedStatus = prefs.getString('status');
-      modelController.text = prefs.getString('model') ?? '';
-      problemController.text = prefs.getString('problem') ?? '';
-      priceController.text = prefs.getString('price') ?? '';
-      paidController.text = prefs.getString('paid') ?? '';
-      additionalDetailsController.text = prefs.getString('additionalDetails') ?? '';
-      warrantyController.text = prefs.getString('warranty') ?? '';
-      operatorController.text = prefs.getString('operator') ?? '';
-      receiverController.text = prefs.getString('receiver') ?? '';
-
-      notifyListeners();
-    } catch (e) {
-      debugPrint('Error loading from SharedPreferences: $e');
-    }
-  }
-   void setLoading(bool loading) {
-    isLoading = loading;
-    notifyListeners();
-  }
   // Validate form fields
   bool validateControllers() {
     return selectedStatus != null &&
-        modelController.text.isNotEmpty &&
-        problemController.text.isNotEmpty &&
-        priceController.text.isNotEmpty &&
-        paidController.text.isNotEmpty;
+        selectedStatus!.isNotEmpty &&
+        _controllers['model']!.text.isNotEmpty &&
+        _controllers['problem']!.text.isNotEmpty &&
+        _controllers['price']!.text.isNotEmpty &&
+        _controllers['paid']!.text.isNotEmpty &&
+        _controllers['receiver']!.text.isNotEmpty;
   }
 
   void setSelectedStatus(String? status) {
@@ -151,16 +148,16 @@ class AddRecordsProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  void setLoading(bool loading) {
+    isLoading = loading;
+    notifyListeners();
+  }
+
   // Dispose controllers to free resources
   void disposeControllers() {
-    additionalDetailsController.dispose();
-    warrantyController.dispose();
-    modelController.dispose();
-    problemController.dispose();
-    priceController.dispose();
-    paidController.dispose();
-    operatorController.dispose();
-    receiverController.dispose();
+    for (var controller in _controllers.values) {
+      controller.dispose();
+    }
   }
 
   @override

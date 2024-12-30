@@ -1,22 +1,38 @@
 import 'package:flutter/material.dart';
 
-class ModelFeild extends StatefulWidget {
+class ModelField extends StatefulWidget {
   final TextEditingController textController;
-  const ModelFeild({super.key,required this.textController});
+
+  const ModelField({super.key, required this.textController});
+
   @override
-  State<ModelFeild> createState() => _ModelFeildState();
+  State<ModelField> createState() => _ModelFieldState();
 }
 
-class _ModelFeildState extends State<ModelFeild> {
+class _ModelFieldState extends State<ModelField> {
+  String? _errorMessage; // Holds the error message
+
+  void _validateInput(String value) {
+    setState(() {
+      if (value.isEmpty) {
+        _errorMessage = 'Please enter a model name';
+      } else if (value.length < 3) {
+        _errorMessage = 'Model name must be at least 3 characters long';
+      } else {
+        _errorMessage = null; // Input is valid
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.all(9),
+      padding: const EdgeInsets.all(9),
       child: Container(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
+            const Text(
               "Model",
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
@@ -25,10 +41,12 @@ class _ModelFeildState extends State<ModelFeild> {
             ),
             TextField(
               controller: widget.textController,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                border: const OutlineInputBorder(),
                 hintText: 'Model..',
+                errorText: _errorMessage, // Display error message
               ),
+              onChanged: _validateInput, // Validate input on change
             ),
             const SizedBox(
               height: 16,

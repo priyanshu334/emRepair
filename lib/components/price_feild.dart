@@ -1,9 +1,31 @@
 import 'package:flutter/material.dart';
 
-class PriceFeild extends StatelessWidget {
-  final TextEditingController Pricecontroller;
+class PriceField extends StatefulWidget {
+  final TextEditingController priceController;
 
-  const PriceFeild({super.key,required this.Pricecontroller});
+  const PriceField({super.key, required this.priceController});
+
+  @override
+  State<PriceField> createState() => _PriceFieldState();
+}
+
+class _PriceFieldState extends State<PriceField> {
+  String? _errorMessage; // Error message for validation
+
+  void _validateInput(String value) {
+    setState(() {
+      if (value.trim().isEmpty) {
+        _errorMessage = 'Price is required';
+      } else {
+        final numericValue = double.tryParse(value);
+        if (numericValue == null || numericValue <= 0) {
+          _errorMessage = 'Enter a valid positive price';
+        } else {
+          _errorMessage = null; // Input is valid
+        }
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -12,20 +34,20 @@ class PriceFeild extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text("Price:",
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-          const SizedBox(
-            height: 15,
+          const Text(
+            "Price:",
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
           ),
+          const SizedBox(height: 15),
           TextField(
-            controller: Pricecontroller,
+            controller: widget.priceController,
+            keyboardType: TextInputType.number,
             decoration: InputDecoration(
-              border: OutlineInputBorder(),
-              hintText: "please enter the price",
+              border: const OutlineInputBorder(),
+              hintText: "Please enter the price",
+              errorText: _errorMessage, // Display error message
             ),
-          ),
-          const SizedBox(
-            height: 12,
+            onChanged: _validateInput, // Validate input in real-time
           ),
         ],
       ),

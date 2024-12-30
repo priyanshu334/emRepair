@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class BottomNav extends StatelessWidget {
@@ -50,34 +51,65 @@ class BottomNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BottomNavigationBar(
-      items: const [
-        BottomNavigationBarItem(
-          icon: Icon(Icons.phone),
-          label: 'Phone',
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Colors.pink.shade400, Colors.pink.shade700],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
         ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.message),
-          label: 'Message',
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(30),
+          topRight: Radius.circular(30),
         ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.phone_android),
-          label: 'WhatsApp',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.print),
-          label: 'Printout',
-        ),
-      ],
-      currentIndex: selectedIndex,
-      onTap: (index) {
-        _launchApp(index); // Launch app on tap
-        onItemTapped(index); // Call the callback function
-      },
-      selectedItemColor: Colors.pink,
-      unselectedItemColor: Colors.grey,
-      showUnselectedLabels: true,
-      type: BottomNavigationBarType.fixed,
+      ),
+      child: BottomNavigationBar(
+        items: [
+          BottomNavigationBarItem(
+            icon: Icon(
+              Icons.phone,
+              size: 30,
+              color: selectedIndex == 0 ? Colors.white : Colors.white70,
+            ),
+            label: 'Phone',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(
+              Icons.message,
+              size: 30,
+              color: selectedIndex == 1 ? Colors.white : Colors.white70,
+            ),
+            label: 'Message',
+          ),
+          BottomNavigationBarItem(
+            icon: FaIcon(
+              FontAwesomeIcons.whatsapp,
+              size: 30,
+              color: selectedIndex == 2 ? Colors.white : Colors.white70,
+            ),
+            label: 'WhatsApp',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(
+              Icons.print,
+              size: 30,
+              color: selectedIndex == 3 ? Colors.white : Colors.white70,
+            ),
+            label: 'Printout',
+          ),
+        ],
+        currentIndex: selectedIndex,
+        onTap: (index) {
+          _launchApp(index); // Launch app on tap
+          onItemTapped(index); // Call the callback function
+        },
+        selectedItemColor: Colors.white,
+        unselectedItemColor: Colors.white70,
+        showUnselectedLabels: true,
+        type: BottomNavigationBarType.fixed,
+        backgroundColor: Colors.transparent,
+        elevation: 10,
+      ),
     );
   }
 }

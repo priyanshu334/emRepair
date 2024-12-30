@@ -1,9 +1,31 @@
 import 'package:flutter/material.dart';
 
-class PaidFeild extends StatelessWidget {
-  final TextEditingController Paidcontroller;
+class PaidField extends StatefulWidget {
+  final TextEditingController paidController;
 
-  const PaidFeild({super.key, required this.Paidcontroller});
+  const PaidField({super.key, required this.paidController});
+
+  @override
+  State<PaidField> createState() => _PaidFieldState();
+}
+
+class _PaidFieldState extends State<PaidField> {
+  String? _errorMessage; // Error message for validation
+
+  void _validateInput(String value) {
+    setState(() {
+      if (value.trim().isEmpty) {
+        _errorMessage = 'Paid amount is required';
+      } else {
+        final numericValue = double.tryParse(value);
+        if (numericValue == null || numericValue <= 0) {
+          _errorMessage = 'Enter a valid positive number';
+        } else {
+          _errorMessage = null; // Input is valid
+        }
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -12,20 +34,20 @@ class PaidFeild extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text("Paid:",
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-          const SizedBox(
-            height: 15,
+          const Text(
+            "Paid:",
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
           ),
+          const SizedBox(height: 15),
           TextField(
-            controller: Paidcontroller,
+            controller: widget.paidController,
+            keyboardType: TextInputType.number,
             decoration: InputDecoration(
-              border: OutlineInputBorder(),
-              hintText: "enter paid amount ",
+              border: const OutlineInputBorder(),
+              hintText: "Enter paid amount",
+              errorText: _errorMessage, // Display error message
             ),
-          ),
-          const SizedBox(
-            height: 12,
+            onChanged: _validateInput, // Validate input in real-time
           ),
         ],
       ),

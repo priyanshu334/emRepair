@@ -1,9 +1,10 @@
+import 'package:em_repair/pages/splash_screen.dart';
+import 'package:em_repair/providers/add_record_provider.dart';
+import 'package:em_repair/providers/list_provider.dart';
+import 'package:em_repair/providers/order_data_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart'; // Import the camera package
-import 'package:app/providers/add_record_provider.dart';
-import 'package:app/providers/list_provider.dart';
-import 'package:app/providers/order_data_provider.dart';
-import 'package:app/pages/splash_screen.dart'; // Import the splash screen file
+ // Import the splash screen file
 import 'package:provider/provider.dart';
 
 List<CameraDescription>? cameras; // List to hold available cameras

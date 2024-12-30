@@ -1,5 +1,8 @@
-import 'package:app/pages/List_page.dart';
+
+import 'package:em_repair/pages/List_page.dart';
+import 'package:em_repair/providers/order_data_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class SelectOperator extends StatelessWidget {
   const SelectOperator({super.key});
@@ -27,6 +30,18 @@ class SelectOperator extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 10),
+          
+          // Button to open dialog and fetch operator data
+          IconButton(
+            icon: const Icon(Icons.search),
+            color: Colors.pink,
+            onPressed: () {
+              _showOperatorDialog(context);
+            },
+          ),
+          
+          const SizedBox(width: 10),
+          
           ElevatedButton(
             onPressed: () {
               Navigator.push(
@@ -89,6 +104,72 @@ class SelectOperator extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  // Function to show dialog with operator list
+  void _showOperatorDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Consumer<OrderDataProvider>(
+          builder: (context, orderDataProvider, child) {
+            // Get distinct operators
+            final operators = orderDataProvider.orders
+                .map((order) => order['operator'] ?? 'Unknown Operator')
+                .toSet()
+                .toList();
+
+            return AlertDialog(
+              title: const Text(
+                'Select Operator',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              content: SizedBox(
+                height: 300,
+                width: double.maxFinite,
+                child: operators.isEmpty
+                    ? const Center(
+                        child: Text(
+                          'No operators available',
+                          style: TextStyle(color: Colors.grey),
+                        ),
+                      )
+                    : ListView.builder(
+                        itemCount: operators.length,
+                        itemBuilder: (context, index) {
+                          final operator = operators[index];
+                          return ListTile(
+                            title: Text(operator),
+                            onTap: () {
+                              Navigator.pop(context, operator);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    'Selected Operator: $operator',
+                                  ),
+                                ),
+                              );
+                            },
+                          );
+                        },
+                      ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text(
+                    'Close',
+                    style: TextStyle(color: Colors.pink),
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
   }
 }
